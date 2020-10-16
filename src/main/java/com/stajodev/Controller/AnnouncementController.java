@@ -52,24 +52,16 @@ public class AnnouncementController {
         return announcementRepository.findById(id);
     }
 
-    @GetMapping("/announcements/pagination/{pageNumber}")
-    public Page<Announcement> getAllAnnouncementPagination(@PathVariable int pageNumber){
-        Pageable pageable = PageRequest.of(pageNumber, 5);
-        Page<Announcement> page = announcementPagingAndSortingRepository.findAll(pageable);
-        return page;
-    }
-
-    @GetMapping("/announcements/pagination/{department}/{pageNumber}")
-    public Page<Announcement> getAnnouncementPagination(@PathVariable int pageNumber,@PathVariable String department){
-        Pageable pageable = PageRequest.of(pageNumber, 5);
-        Page<Announcement> page;
+    @GetMapping("/announcements-all/{department}")
+    public List<Announcement> getAnnouncements(@PathVariable String department){
         System.out.println(department);
+        List<Announcement> announcements;
         if (department.equals("all")){
-            page = announcementPagingAndSortingRepository.findAll(pageable);
+            announcements = announcementRepository.findAll();
         }else{
-            page = announcementPagingAndSortingRepository.findAllByDepartment(department, pageable);
+            announcements = announcementRepository.findAllByDepartment(department);
         }
-        return page;
+        return announcements;
     }
 
     @PostMapping(value = "/announcements/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
