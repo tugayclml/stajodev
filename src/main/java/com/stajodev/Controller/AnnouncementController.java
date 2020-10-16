@@ -141,7 +141,12 @@ public class AnnouncementController {
         updateAnnouncement.setDepartment(announcement.getDepartment());
         announcementRepository.save(updateAnnouncement);
 
-        List<User> users = userRepository.findAll();
+        List<User> users;
+        if (announcement.getDepartment().equals("all")){
+            users = userRepository.findAll();
+        }else{
+            users = userRepository.findAllByDepartment(announcement.getDepartment());
+        }
         users.forEach(user -> {
             try {
                 System.out.println(user.getEmail());
