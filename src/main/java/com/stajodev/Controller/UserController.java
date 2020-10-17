@@ -34,10 +34,14 @@ public class UserController {
 
     @PostMapping(value = "/users/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, String> saveUser(@RequestBody User user) throws Exception{
-        Date date = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        user.setDate(formatter.format(date));
         Map<String, String> response = new HashMap<>();
+        Optional<User> hasEmail = userRepository.findByEmail(user.getEmail());
+
+        if(hasEmail.isPresent()){
+            response.put("error", "Bu email adresi zaten mevcut!");
+            return response;
+        }
+
         if (user.getName() == "" || user.getSurname() == ""){
             response.put("error", "Ad ve Soyad boş bırakılamaz!");
             return response;
@@ -46,8 +50,12 @@ public class UserController {
         if (user.getEmail() == ""){
             response.put("error", "Email alanı boş bırakılamaz");
         }
-        userRepository.save(user);
 
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        user.setDate(formatter.format(date));
+
+        userRepository.save(user);
         response.put("success", "İşleminiz başarıyla gerçekleşmiştir.");
         return response;
     }
@@ -69,6 +77,19 @@ public class UserController {
         userRepository.deleteById(id);
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);
+        return response;
+    }
+
+    @DeleteMapping("/users/exitemail/{email}")
+    public Map<String, Boolean> deleteUserByEmail(@PathVariable String email){
+        Optional<User> user =  userRepository.findByEmail(email);
+        Map<String, Boolean> response = new HashMap<>();
+        if (user.isPresent()){
+            userRepository.deleteById(user.get().getId());
+            response.put("deleted", true);
+        }else{
+            response.put("deleted", false);
+        }
         return response;
     }
 
